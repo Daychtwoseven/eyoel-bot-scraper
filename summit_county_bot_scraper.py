@@ -13,9 +13,11 @@ from selenium.common.exceptions import StaleElementReferenceException, NoSuchEle
     ElementNotInteractableException
 import time, requests, pytesseract, json
 
-# Import the necessary class from webdriver_manager
-# from webdriver_manager.chrome import ChromeDriverManager # This import is no longer needed
+# Note: The webdriver_manager library is no longer needed since you are using a
+# manually installed chromedriver.
+# from webdriver_manager.chrome import ChromeDriverManager
 
+# Your OpenAI API client initialization
 client = OpenAI(
     api_key="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")
 
@@ -26,30 +28,22 @@ class Main:
 
     def run(self):
         try:
-            # Create a ChromeOptions object
+            # 1. Configure headless mode for a server environment
             chrome_options = Options()
-
-            # Add the headless argument for server environment
             chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
 
-            # Specify the path to your manually installed chromedriver
+            # 2. Specify the path to your manually installed chromedriver
             chromedriver_path = '/usr/bin/chromedriver'
-
-            # Use the Service class with the specified executable path
             service = ChromeService(executable_path=chromedriver_path)
 
-            # Initialize the WebDriver with the service and options
+            # 3. Initialize the WebDriver with the service and options
             driver = webdriver.Chrome(service=service, options=chrome_options)
-
             wait = WebDriverWait(driver, 20)
 
             driver.get("https://clerkweb.summitoh.net/Welcome.asp")
 
-            # ... (rest of your scraping logic)
-            # The rest of your code remains the same since the driver object is identical
-            # ...
             record_search_btn = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td/table/tbody/tr/td[2]/a[1]")))
             driver.execute_script("arguments[0].click();", record_search_btn)
@@ -97,7 +91,6 @@ class Main:
             wait.until(EC.presence_of_element_located((By.ID, "ContentPlaceHolder1_lblSelection")))
 
             if 'No Entries Found. .' not in driver.page_source:
-
                 trs = driver.find_element(By.ID, "ContentPlaceHolder1_gvMixedResults").find_elements(By.TAG_NAME, "tr")
                 for tr in trs[1:]:
                     tds = tr.find_elements(By.TAG_NAME, "td")
@@ -117,6 +110,7 @@ class Main:
         try:
             url = f"https://clerkweb.summitoh.net/PublicSite/CaseDetail.aspx?CaseNo={case_number}&Suffix=&Type="
 
+            # The headers and payload remain the same
             payload = {}
             headers = {
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
@@ -168,23 +162,18 @@ class Main:
 
     def scrape_via_workflow2(self, parcel_number):
         try:
-            # Create ChromeOptions object for this function
+            # 1. Configure headless mode for a server environment
             chrome_options = Options()
-
-            # Add the headless argument for server environment
             chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
 
-            # Specify the path to your manually installed chromedriver
+            # 2. Specify the path to your manually installed chromedriver
             chromedriver_path = '/usr/bin/chromedriver'
-
-            # Use the Service class with the specified executable path
             service = ChromeService(executable_path=chromedriver_path)
 
-            # Initialize the WebDriver with the service and options
+            # 3. Initialize the WebDriver with the service and options
             driver = webdriver.Chrome(service=service, options=chrome_options)
-
             wait = WebDriverWait(driver, 20)
 
             driver.get(
