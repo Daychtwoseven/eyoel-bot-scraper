@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 from pdf2image import convert_from_path
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -13,7 +14,7 @@ from selenium.common.exceptions import StaleElementReferenceException, NoSuchEle
 import time, requests, pytesseract, json
 
 # Import the necessary class from webdriver_manager
-from webdriver_manager.chrome import ChromeDriverManager
+# from webdriver_manager.chrome import ChromeDriverManager # This import is no longer needed
 
 client = OpenAI(
     api_key="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")
@@ -25,9 +26,23 @@ class Main:
 
     def run(self):
         try:
-            # Use ChromeDriverManager to automatically install the correct chromedriver
-            # The .install() method will download the latest version and return its path
-            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+            # Create a ChromeOptions object
+            chrome_options = Options()
+
+            # Add the headless argument for server environment
+            chrome_options.add_argument("--headless=new")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+
+            # Specify the path to your manually installed chromedriver
+            chromedriver_path = '/usr/bin/chromedriver'
+
+            # Use the Service class with the specified executable path
+            service = ChromeService(executable_path=chromedriver_path)
+
+            # Initialize the WebDriver with the service and options
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+
             wait = WebDriverWait(driver, 20)
 
             driver.get("https://clerkweb.summitoh.net/Welcome.asp")
@@ -138,8 +153,8 @@ class Main:
                             href_value = document_element["href"]
                             document_url = f"https://clerkweb.summitoh.net/PublicSite/{href_value}"
                             data = self.download_and_analyze_pdf(document_url)
-                            if data and "```json" in data:
-                                data = data.replace("```json", '').replace('```', '')
+                            if data and '```json' in data:
+                                data = data.replace('```json', '').replace('```', '')
 
                             data = json.loads(data)
                             return data
@@ -153,8 +168,23 @@ class Main:
 
     def scrape_via_workflow2(self, parcel_number):
         try:
-            # Use ChromeDriverManager here as well
-            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+            # Create ChromeOptions object for this function
+            chrome_options = Options()
+
+            # Add the headless argument for server environment
+            chrome_options.add_argument("--headless=new")
+            chrome_options.add_argument("--no-sandbox")
+            chrome_options.add_argument("--disable-dev-shm-usage")
+
+            # Specify the path to your manually installed chromedriver
+            chromedriver_path = '/usr/bin/chromedriver'
+
+            # Use the Service class with the specified executable path
+            service = ChromeService(executable_path=chromedriver_path)
+
+            # Initialize the WebDriver with the service and options
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+
             wait = WebDriverWait(driver, 20)
 
             driver.get(
@@ -260,6 +290,6 @@ class Main:
 
 if __name__ == "__main__":
     main = Main()
-    #main.scrape_via_soup("CV-2025-09-4147")
+    # main.scrape_via_soup("CV-2025-09-4147")
     main.run()
-    #main.scrape_via_workflow2(5604009)
+    # main.scrape_via_workflow2(5604009)
