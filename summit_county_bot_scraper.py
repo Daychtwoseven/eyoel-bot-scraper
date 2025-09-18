@@ -18,9 +18,7 @@ import time, requests, pytesseract, json
 # from webdriver_manager.chrome import ChromeDriverManager
 
 # Your OpenAI API client initialization
-client = OpenAI(
-    api_key="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")
-
+client = OpenAI(api_key="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")
 
 class Main:
     def __init__(self):
