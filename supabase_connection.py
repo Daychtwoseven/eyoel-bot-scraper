@@ -22,12 +22,17 @@ def fetch_all(table: str):
         return []
 
 
-def insert_foreclosure_lead(address: str,
-                            workflow: int,
-                            document_url: str,
-                            document_id: str,
-                            file_date: date,
-                            sale_date: date):
+def insert_leads_v2(address: str,
+                    city: str,
+                    state: str,
+                    zip: str,
+                    workflow: int,
+                    document_url: str,
+                    document_id: str,
+                    file_date: date,
+                    sale_date: date,
+                    table: str,
+                    type: str):
     """
     Insert a new foreclosure lead into houston_foreclosure_leads table.
 
@@ -44,13 +49,17 @@ def insert_foreclosure_lead(address: str,
     try:
         data = {
             "address": address,
+            "city": city,
+            "state": state,
+            "zip": zip,
             "workflow": workflow,
             "document_url": document_url,
             "document_id": document_id,
             "file_date": file_date.isoformat() if file_date else None,
             "sale_date": sale_date.isoformat() if sale_date else None,
+            "type": type
         }
-        response = supabase.table("houston_foreclosure_leads").insert(data).execute()
+        response = supabase.table(table).insert(data).execute()
         return response.data
     except Exception as e:
         print(f"❌ Error inserting foreclosure lead: {e}")
@@ -60,7 +69,7 @@ def insert_foreclosure_lead(address: str,
 if __name__ == "__main__":
     # Example: fetch all rows
 
-    new_lead = insert_foreclosure_lead(
+    """new_lead = insert_foreclosure_lead(
         address="123 Main St, Houston, TX",
         workflow=1,
         document_url="https://example.com/doc.pdf",
@@ -68,7 +77,7 @@ if __name__ == "__main__":
         file_date=date(2025, 1, 15),
         sale_date=date(2025, 2, 1)
     )
-    print("✅ Inserted:", new_lead)
+    print("✅ Inserted:", new_lead)"""
 
-    rows = fetch_all("houston_foreclosure_leads")
+    rows = fetch_all("leads_v2")
     print("📦 Data:", rows)

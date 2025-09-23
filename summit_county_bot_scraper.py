@@ -1,7 +1,3 @@
-from datetime import date
-from openai import OpenAI
-from bs4 import BeautifulSoup
-from pdf2image import convert_from_path
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options
@@ -11,37 +7,46 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException, \
     ElementNotInteractableException
-import time, requests, pytesseract, json
+import time, requests, pytesseract, json, platform, os
+from webdriver_manager.chrome import ChromeDriverManager
+from openai import OpenAI
+from bs4 import BeautifulSoup
+from pdf2image import convert_from_path
+from datetime import date, datetime
+from dotenv import load_dotenv
 
-# Note: The webdriver_manager library is no longer needed since you are using a
-# manually installed chromedriver.
-# from webdriver_manager.chrome import ChromeDriverManager
+from supabase_connection import get_supabase_client, insert_leads_v2
 
+load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Your OpenAI API client initialization
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 class Main:
     def __init__(self):
         print("Running Harris Bot Scraper")
+        self.supabase = get_supabase_client()
 
     def run(self):
         try:
+
             # 1. Configure headless mode for a server environment
             chrome_options = Options()
             chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
 
-            # 2. Specify the path to your manually installed chromedriver
-            chromedriver_path = '/usr/bin/chromedriver'
-            service = ChromeService(executable_path=chromedriver_path)
+            # 2. Automatically download and install the correct chromedriver
+            # This works for both Ubuntu and macOS
+            service = ChromeService(ChromeDriverManager().install())
 
             # 3. Initialize the WebDriver with the service and options
             driver = webdriver.Chrome(service=service, options=chrome_options)
             wait = WebDriverWait(driver, 20)
 
+            # ... (rest of your scraping logic)
             driver.get("https://clerkweb.summitoh.net/Welcome.asp")
-
+            # ... (the rest of your script follows here)
             record_search_btn = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, "/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td/table/tbody/tr/td[2]/a[1]")))
             driver.execute_script("arguments[0].click();", record_search_btn)
@@ -95,11 +100,40 @@ class Main:
                     filing_date = tds[0].text
                     case_number_element = tds[1]
                     case_number = case_number_element.text
-                    caption = tds[2].text
 
-                    data = self.scrape_via_soup(case_number)
-                    if data and 'found' in data and data['found'] == False:
-                        parcel_number = data['parcel_number']
+                    response = self.supabase.table('leads_v2').select("*").eq('document_id', case_number).execute()
+                    data = response.data
+
+                    if data:
+                        print("Document found!")
+                        print(data)
+                    else:
+                        caption = tds[2].text
+
+                        data = self.scrape_via_soup(case_number)
+                        if data and 'found' in data and data['found'] == False:
+                            parcel_number = data['parcel_number']
+                        else:
+                            address = data.get('address', '')
+                            city = data.get('city', '')
+                            state = data.get('state', '')
+                            zip = data.get('zip', '')
+                            document_url = data.get('document_url', '')
+                            new_lead = insert_leads_v2(
+                                address=address,
+                                city=city,
+                                state=state,
+                                zip=zip,
+                                workflow=1,
+                                document_url=document_url,
+                                document_id=case_number,
+                                file_date=datetime.strptime(filing_date, "%m/%d/%Y").date(),
+                                sale_date=date(2025, 2, 1),
+                                table="leads_v2",
+                                type="summit_county"
+                            )
+                            print("✅ Inserted:", new_lead)
+
 
         except Exception as e:
             print("❌ Error:", e)
@@ -149,6 +183,7 @@ class Main:
                                 data = data.replace('```json', '').replace('```', '')
 
                             data = json.loads(data)
+                            data['document_url'] = document_url
                             return data
 
                         else:
@@ -166,9 +201,9 @@ class Main:
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
 
-            # 2. Specify the path to your manually installed chromedriver
-            chromedriver_path = '/usr/bin/chromedriver'
-            service = ChromeService(executable_path=chromedriver_path)
+            # 2. Automatically download and install the correct chromedriver
+            # This works for both Ubuntu and macOS
+            service = ChromeService(ChromeDriverManager().install())
 
             # 3. Initialize the WebDriver with the service and options
             driver = webdriver.Chrome(service=service, options=chrome_options)
