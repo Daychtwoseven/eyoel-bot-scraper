@@ -24,7 +24,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 class Main:
     def __init__(self):
-        print("Running Harris Bot Scraper")
+        print("Running Akron Foreclosure Bot Scraper")
         self.supabase = get_supabase_client()
 
     def run(self):
@@ -101,7 +101,7 @@ class Main:
                     case_number_element = tds[1]
                     case_number = case_number_element.text
 
-                    response = self.supabase.table('leads_v2').select("*").eq('document_id', case_number).execute()
+                    response = self.supabase.table('foreclosure_leads_v2').select("*").eq('document_id', case_number).execute()
                     data = response.data
 
                     if data:
@@ -130,7 +130,8 @@ class Main:
                                 file_date=datetime.strptime(filing_date, "%m/%d/%Y").date(),
                                 sale_date=date(2025, 2, 1),
                                 table="foreclosure_leads_v2",
-                                type="summit_county"
+                                type="summit_county",
+                                name=""
                             )
                             print("✅ Inserted:", new_lead)
 

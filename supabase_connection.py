@@ -32,7 +32,8 @@ def insert_leads_v2(address: str,
                     file_date: date,
                     sale_date: date,
                     table: str,
-                    type: str):
+                    type: str,
+                    name: str):
     """
     Insert a new foreclosure lead into houston_foreclosure_leads table.
 
@@ -57,7 +58,8 @@ def insert_leads_v2(address: str,
             "document_id": document_id,
             "file_date": file_date.isoformat() if file_date else None,
             "sale_date": sale_date.isoformat() if sale_date else None,
-            "type": type
+            "type": type,
+            "name": name
         }
         response = supabase.table(table).insert(data).execute()
         return response.data
