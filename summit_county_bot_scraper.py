@@ -129,7 +129,7 @@ class Main:
                                 document_id=case_number,
                                 file_date=datetime.strptime(filing_date, "%m/%d/%Y").date(),
                                 sale_date=date(2025, 2, 1),
-                                table="leads_v2",
+                                table="foreclosure_leads_v2",
                                 type="summit_county"
                             )
                             print("✅ Inserted:", new_lead)
