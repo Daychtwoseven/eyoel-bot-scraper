@@ -26,7 +26,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 class Main:
     def __init__(self):
-        print("Running Cleaveland Foreclosure Bot Scraper")
+        print("Running Cleveland Foreclosure Bot Scraper")
         self.supabase = get_supabase_client()
 
     def run(self):
