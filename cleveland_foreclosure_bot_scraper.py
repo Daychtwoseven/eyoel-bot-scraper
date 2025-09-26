@@ -95,7 +95,7 @@ class Main:
 
 
 
-                response = self.supabase.table('foreclosure_leads_v2').select("*").eq('type', 'cleaveland').eq('document_id', case_number).execute()
+                response = self.supabase.table('foreclosure_leads_v2').select("*").eq('type', 'cleveland').eq('document_id', case_number).execute()
                 data = response.data
 
                 if data:
@@ -112,7 +112,7 @@ class Main:
                         file_date=file_date,
                         sale_date=date.today(),
                         table="foreclosure_leads_v2",
-                        type="cleaveland",
+                        type="cleveland",
                         name="defendant"
                     )
                     print("✅ Inserted:", new_lead)
