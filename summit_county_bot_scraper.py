@@ -101,7 +101,7 @@ class Main:
                     case_number_element = tds[1]
                     case_number = case_number_element.text
 
-                    response = self.supabase.table('foreclosure_leads_v2').select("*").eq('document_id', case_number).execute()
+                    response = self.supabase.table('foreclosure_leads_v2').select("*").eq('type', 'Akron Pre-Foreclosure').eq('document_id', case_number).execute()
                     data = response.data
 
                     if data:
@@ -130,7 +130,7 @@ class Main:
                                 file_date=datetime.strptime(filing_date, "%m/%d/%Y").date(),
                                 sale_date=date(2025, 2, 1),
                                 table="foreclosure_leads_v2",
-                                type="summit_county",
+                                type="Akron Pre-Foreclosure",
                                 name=""
                             )
                             print("✅ Inserted:", new_lead)
