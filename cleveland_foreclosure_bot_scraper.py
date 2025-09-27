@@ -95,7 +95,7 @@ class Main:
 
 
 
-                response = self.supabase.table('foreclosure_leads_v2').select("*").eq('type', 'Cleveland Pre-Foreclosure').eq('document_id', case_number).execute()
+                response = self.supabase.table('leads_v2').select("*").eq('type', 'Cleveland Pre-Foreclosure').eq('document_id', case_number).execute()
                 data = response.data
 
                 if data:
@@ -111,7 +111,7 @@ class Main:
                         document_id=case_number,
                         file_date=file_date,
                         sale_date=date.today(),
-                        table="foreclosure_leads_v2",
+                        table="leads_v2",
                         type="Cleveland Pre-Foreclosure",
                         name="defendant"
                     )
